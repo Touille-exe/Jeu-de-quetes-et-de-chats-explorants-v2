@@ -206,11 +206,13 @@ class Jeuettoutenfaite:
                 if event.type == pygame.QUIT:
                     menu_principal = False
                     self.quitter()
-                    return self
+                    return
+
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if self.rect_boutton_parametre.collidepoint(souris_pos):
                         self.parametres()
                         return
+
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_F11:
                     if self.en_plein_ecran:
                         self.en_plein_ecran = False
@@ -218,6 +220,11 @@ class Jeuettoutenfaite:
                     elif not self.en_plein_ecran:
                         self.en_plein_ecran = True
                         self.ecran = pygame.display.set_mode((self.taille_x, self.taille_y), pygame.FULLSCREEN)
+
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    menu_principal = False
+                    self.quitter()
+                    return
 
 
             self.ecran.fill((0, 0, 0))
