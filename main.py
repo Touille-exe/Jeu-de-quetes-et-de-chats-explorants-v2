@@ -43,7 +43,15 @@ class Jeuettoutenfaite:
         self.carte_renderer.zoom = 1.0
         self.groupe_de_calques = pyscroll.PyscrollGroup(map_layer=self.carte_renderer, default_layer=1)
 
-        self.ecran_charge()                                                                                                    # actualiser l'écran de chargement
+        self.ecran_charge()                                                                                       # actualiser l'écran de chargement
+
+        # Couleurs
+        self.rouge_de_lecriture = (197, 15, 31)
+        self.vert_de_lecriture = (21, 171, 12)
+        self.gris_du_fond = (121, 125, 127)
+        self.blanc = (255, 255, 255)
+        self.noir = (0, 0, 0)
+        self.rouge = (255, 0, 0)
 
         # Chargement et redimensionnement des boutons du menu principal
         self.boutton_jouer_img = pygame.image.load("assets/boutton du menu principal/boutton play.png")
@@ -119,50 +127,73 @@ class Jeuettoutenfaite:
         pygame.quit()
 
     def parametres(self):
-        q = False
         en_parametres = True
+        zoom_drag = False  # Pour savoir si on déplace le bouton de zoom
+
+        # Limites du slider
+        pos_barre_x = 700
+        largeur_barre = 500
+        min_x = pos_barre_x + 20
+        max_x = pos_barre_x + largeur_barre - 90  # Le rond fait ~70px
+
+        # Position initiale du rond basée sur le zoom
+        self.rect_rond_zoom = min_x + ((self.zoom - 0.5) / (1.5 - 0.5)) * (max_x - min_x)
+
         while en_parametres:
-
-
-            self.ecran.blit(self.rond_img, (self.rect_rond_zoom, 515))
-            font = pygame.font.SysFont("monospace", 50)
-            texte_zoom = font.render(f"Zoom: {round(self.zoom, 2)}x", True, (0, 150, 200))
-            self.ecran.blit(texte_zoom, (50, 500))
-            pygame.display.flip()
-
-            position_boutton_rond_zoom = self.rond_img.get_rect(topleft=(self.rect_rond_zoom, 515))
-
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     en_parametres = False
-                    q = True
+                    self.quitter()
+                    return
+
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         en_parametres = False
                         self.menu_principal()
-                        return self
+                        return
 
                     if event.key == pygame.K_F11:
                         self.en_plein_ecran = not self.en_plein_ecran
                         if self.en_plein_ecran:
-                            ecran = pygame.display.set_mode((self.taille_x, self.taille_y), pygame.FULLSCREEN)
+                            self.ecran = pygame.display.set_mode((self.taille_x, self.taille_y), pygame.FULLSCREEN)
                         else:
-                            ecran = pygame.display.set_mode((self.taille_x, self.taille_y - 90))
+                            self.ecran = pygame.display.set_mode((self.taille_x, self.taille_y - 90))
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if self.rect_boutton_retour.collidepoint(event.pos):
                         en_parametres = False
                         self.menu_principal()
-                        return self
+                        return
 
-                if pygame.mouse.get_pressed()[0]:         ## ouais diago stp fais ton boutton qui bouge stp (g rien compris)
-                    pass
+                    # Détection du clic sur le rond
+                    position_boutton_rond_zoom = self.rond_img.get_rect(topleft=(self.rect_rond_zoom, 515))
+                    if position_boutton_rond_zoom.collidepoint(event.pos):
+                        zoom_drag = True
+
+                if event.type == pygame.MOUSEBUTTONUP:
+                    zoom_drag = False
+
+                if event.type == pygame.MOUSEMOTION and zoom_drag:
+                    mouse_x = pygame.mouse.get_pos()[0]
+                    self.rect_rond_zoom = max(min_x, min(mouse_x, max_x))
+
+                    # Calcul du zoom en fonction de la position du rond
+                    percent = (self.rect_rond_zoom - min_x) / (max_x - min_x)
+                    self.zoom = round(0.5 + percent * (1.5 - 0.5), 2)
+                    self.carte_renderer.zoom = self.zoom
+
+            # Affichage
             self.ecran.fill((255, 255, 255))
             self.ecran.blit(self.boutton_retour_img, self.rect_boutton_retour)
-            self.ecran.blit(self.barre_img, (700, 500))
+            self.ecran.blit(self.barre_img, (pos_barre_x, 500))
+            self.ecran.blit(self.rond_img, (self.rect_rond_zoom, 515))
 
+            font = pygame.font.SysFont("monospace", 50)
+            texte_zoom = font.render(f"Zoom: {round(self.zoom, 2)}x", True, (0, 150, 200))
+            self.ecran.blit(texte_zoom, (50, 500))
 
-
+            pygame.display.flip()
+            self.clock.tick(60)
 
     def menu_principal(self):
         self.etat = "menu_principal"
