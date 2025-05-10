@@ -2,7 +2,7 @@ import pygame
 import pytmx
 import pyscroll
 import pyautogui
-import json
+##                 import json
 import time
 
 
