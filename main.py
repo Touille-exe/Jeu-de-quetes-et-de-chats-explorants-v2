@@ -79,7 +79,7 @@ class Jeuettoutenfaite:
         self.zoom = 1.0
 
         self.etapecharger = 4
-        self.ecran_charge()                                                                                                    # actualiser l'écran de chargement
+        self.ecran_charge()                                                                                                    # finir l'écran de chargement
 
         # États du jeu
         self.etat = "menu_on"
