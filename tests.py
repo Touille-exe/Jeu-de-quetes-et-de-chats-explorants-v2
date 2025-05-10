@@ -44,15 +44,3 @@ def chargement():
         ecran.fill((121, 125, 127))
         ecran.blit(texte, texte_rect)
         pygame.display.flip()
-
-
-chargement()
-pygame.quit()
-
-
-#  font.render("Chargement ...", True, (197, 15, 31))
-#
-#
-#
-#
-#

@@ -2,7 +2,7 @@ import pygame
 import pytmx
 import pyscroll
 import pyautogui
-##                 import json
+##     import json
 import time
 
 
@@ -43,20 +43,20 @@ class Jeuettoutenfaite:
         # Chargement et redimensionnement des boutons du menu principal
         self.boutton_jouer_img = pygame.image.load("assets/boutton du menu principal/boutton play.png")
         self.boutton_jouer_img = pygame.transform.scale(self.boutton_jouer_img, (100, 100))
-        self.position_boutton_jouer = self.boutton_jouer_img.get_rect(center=(self.TAILLE_X_MOITIE, self.TAILLE_Y_MOITIE))
+        self.rect_boutton_jouer = self.boutton_jouer_img.get_rect(center=(self.TAILLE_X_MOITIE, self.TAILLE_Y_MOITIE))
 
         self.ecran_charge()                                                                                                    # actualiser l'écran de chargement
 
         self.boutton_parametre_img = pygame.image.load("assets/boutton du menu principal/paramètres.png")
         self.boutton_parametre_img = pygame.transform.scale(self.boutton_parametre_img, (75, 75))
-        self.position_boutton_parametre = self.boutton_parametre_img.get_rect(center=(self.taille_x / 4, self.TAILLE_Y_MOITIE))
+        self.rect_boutton_parametre = self.boutton_parametre_img.get_rect(center=(self.taille_x / 4, self.TAILLE_Y_MOITIE))
 
         self.ecran_charge()                                                                                                    # actualiser l'écran de chargement
 
         self.boutton_retour_img = pygame.image.load("assets/boutton du menu principal/retour.png")
         self.boutton_retour_img = pygame.transform.scale(self.boutton_retour_img, (75, 75))
-        self.position_boutton_retour_fullscreen = self.boutton_retour_img.get_rect(bottomright=(self.taille_x - 50, self.taille_y - 50))
-        self.position_boutton_retour_windowed = self.boutton_retour_img.get_rect(bottomright=(self.taille_x - 50, self.taille_y - 150))
+        self.rect_boutton_retour_fullscreen = self.boutton_retour_img.get_rect(bottomright=(self.taille_x - 50, self.taille_y - 50))
+        self.rect_boutton_retour_windowed = self.boutton_retour_img.get_rect(bottomright=(self.taille_x - 50, self.taille_y - 150))
 
         self.ecran_charge()                                                                                                    # actualiser l'écran de chargement
 
@@ -82,7 +82,8 @@ class Jeuettoutenfaite:
         self.ecran_charge()                                                                                                    # finir l'écran de chargement
 
         # États du jeu
-        self.etat = "menu_on"
+        self.etat = "euu"
+        self.menu_principal()
 
     def ecran_charge(self):
         if self.etapecharger == 1:
@@ -120,6 +121,30 @@ class Jeuettoutenfaite:
             pygame.display.flip()
             self.etapecharger = 1
             time.sleep(0.5)
+
+    def quitter(self):
+        pygame.quit()
+
+    def menu_principal(self):
+        self.etat = "menu_principal"
+        menu_principal = True
+        while menu_principal:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    menu_principal = False
+                    self.quitter()
+                    return self
+
+            self.ecran.fill((0, 0, 0))
+            self.ecran.blit(self.boutton_jouer_img, self.rect_boutton_jouer)
+            self.ecran.blit(self.boutton_parametre_img, self.rect_boutton_parametre)
+
+            pygame.display.flip()
+            self.clock.tick(60)
+
+
+
+
 
 
 Jeuettoutenfaite()
