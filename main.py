@@ -92,7 +92,6 @@ class Jeuettoutenfaite:
             texte_rect = texte.get_rect(center=(self.TAILLE_X_MOITIE, self.TAILLE_Y_MOITIE))
             self.ecran.fill((121, 125, 127))
             self.ecran.blit(texte, texte_rect)
-            pygame.display.flip()
             self.etapecharger += 1
             time.sleep(0.2)
 
@@ -101,7 +100,6 @@ class Jeuettoutenfaite:
             texte_rect = texte.get_rect(center=(self.TAILLE_X_MOITIE, self.TAILLE_Y_MOITIE))
             self.ecran.fill((121, 125, 127))
             self.ecran.blit(texte, texte_rect)
-            pygame.display.flip()
             self.etapecharger += 1
             time.sleep(0.2)
 
@@ -110,7 +108,6 @@ class Jeuettoutenfaite:
             texte_rect = texte.get_rect(center=(self.TAILLE_X_MOITIE, self.TAILLE_Y_MOITIE))
             self.ecran.fill((121, 125, 127))
             self.ecran.blit(texte, texte_rect)
-            pygame.display.flip()
             self.etapecharger = 1
             time.sleep(0.2)
 
@@ -119,9 +116,10 @@ class Jeuettoutenfaite:
             texte_rect = texte.get_rect(center=(self.TAILLE_X_MOITIE, self.TAILLE_Y_MOITIE))
             self.ecran.fill((121, 125, 127))
             self.ecran.blit(texte, texte_rect)
-            pygame.display.flip()
             self.etapecharger = 1
             time.sleep(0.5)
+
+        pygame.display.flip()
 
     def quitter(self):
         pygame.quit()
