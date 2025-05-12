@@ -39,9 +39,10 @@ class Jeuettoutenfaite:
         # Chargement de la carte et des calques
         self.tmx_data = pytmx.util_pygame.load_pygame("assets/carte/carte_v2.tmx")
         self.map_data = pyscroll.data.TiledMapData(self.tmx_data)
+        self.position_du_spawn = self.tmx_data.get_object_by_name("spawn")  # Récupération de l'objet spawn
         self.map_layer = pyscroll.orthographic.BufferedRenderer(self.map_data, (self.taille_x, self.taille_y), clamp_camera=True)
         self.map_layer.zoom = self.zoom_para + 2
-        self.groupe_de_calques = pyscroll.PyscrollGroup(map_layer=self.map_layer, default_layer=1)
+        self.groupe_de_calques = pyscroll.PyscrollGroup(map_layer=self.map_layer, default_layer=5)
 
         self.ecran_charge()                                                                                                        # actualiser l'écran de chargement
 
@@ -77,7 +78,10 @@ class Jeuettoutenfaite:
         self.rect_rond_zoom = 920 + (self.zoom_para * 400)
 
         # Chargement de l'image du joueur
-        self.img_joueur = pygame.image.load("assets/joueurs/spritesheet.png")
+        self.position_x_joueur = self.position_du_spawn.x
+        self.position_y_joueur = self.position_du_spawn.y
+        self.img_joueur = pygame.image.load("assets/joueurs/sprites/1_leo/1face2.png")
+        self.img_joueur.set_colorkey([255, 255, 255])
 
 
         self.etapecharger = 4
@@ -294,7 +298,7 @@ class Jeuettoutenfaite:
 
     def controledujoueur(self):
         touche_appuyees = pygame.key.get_pressed()
-        vitesse = 5  # vitesse du joueur en pixels
+        vitesse = 0.2  # vitesse du joueur en pixels
 
         if touche_appuyees[pygame.K_z]:
             self.position_y_joueur -= vitesse
