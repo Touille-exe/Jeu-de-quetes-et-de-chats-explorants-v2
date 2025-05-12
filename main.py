@@ -34,13 +34,13 @@ class Jeuettoutenfaite:
         # Variables de jeu
         self.position_x_joueur = 0
         self.position_y_joueur = 0
-        self.zoom = 1.0
+        self.zoom_para = 1.0
 
         # Chargement de la carte et des calques
         self.tmx_data = pytmx.util_pygame.load_pygame("assets/carte/carte_v2.tmx")
         self.map_data = pyscroll.data.TiledMapData(self.tmx_data)
         self.map_layer = pyscroll.orthographic.BufferedRenderer(self.map_data, (self.taille_x, self.taille_y), clamp_camera=True)
-        self.map_layer.zoom = self.zoom
+        self.map_layer.zoom = self.zoom_para + 2
         self.groupe_de_calques = pyscroll.PyscrollGroup(map_layer=self.map_layer, default_layer=1)
 
         self.ecran_charge()                                                                                                        # actualiser l'écran de chargement
@@ -74,10 +74,11 @@ class Jeuettoutenfaite:
         self.barre_img = pygame.transform.scale(self.barre_img, (500, 100))
         self.rond_img = pygame.image.load("assets/boutton du menu principal/para/rond.png")
         self.rond_img = pygame.transform.scale(self.rond_img, (70, 70))
-        self.rect_rond_zoom = 920 + (self.zoom * 400)
+        self.rect_rond_zoom = 920 + (self.zoom_para * 400)
 
         # Chargement de l'image du joueur
         self.img_joueur = pygame.image.load("assets/joueurs/spritesheet.png")
+
 
         self.etapecharger = 4
         self.ecran_charge()                                                                                                    # finir l'écran de chargement
@@ -134,7 +135,7 @@ class Jeuettoutenfaite:
 
     def parametres(self):
         en_parametres = True
-        zoom_drag = False  # Pour savoir si on déplace le bouton de zoom
+        zoom_drag = False  # Pour savoir si on déplace le bouton de zoom_para
 
         # Limites du slider
         pos_barre_x = 700
@@ -142,8 +143,12 @@ class Jeuettoutenfaite:
         min_x = pos_barre_x + 20
         max_x = pos_barre_x + largeur_barre - 90  # Le rond fait ~70px
 
-        # Position initiale du rond basée sur le zoom
-        self.rect_rond_zoom = min_x + ((self.zoom - 0.5) / (1.5 - 0.5)) * (max_x - min_x)
+        # Valeurs de zoom_para modifiables
+        zoom_min = 1.0
+        zoom_max = 1.5
+
+        # Position initiale du rond basée sur le zoom_para
+        self.rect_rond_zoom = min_x + ((self.zoom_para - zoom_min) / (zoom_max - zoom_min)) * (max_x - min_x)
 
         while en_parametres:
             for event in pygame.event.get():
@@ -183,10 +188,10 @@ class Jeuettoutenfaite:
                     mouse_x = pygame.mouse.get_pos()[0]
                     self.rect_rond_zoom = max(min_x, min(mouse_x, max_x))
 
-                    # Calcul du zoom en fonction de la position du rond
+                    # Calcul du zoom_para en fonction de la position du rond
                     percent = (self.rect_rond_zoom - min_x) / (max_x - min_x)
-                    self.zoom = round(0.5 + percent * (1.5 - 0.5), 2)
-                    self.map_layer.zoom = self.zoom
+                    self.zoom_para = round(zoom_min + percent * (zoom_max - zoom_min), 2)
+                    self.map_layer.zoom = self.zoom_para + 2
 
             # Affichage
             self.ecran.fill((255, 255, 255))
@@ -195,7 +200,7 @@ class Jeuettoutenfaite:
             self.ecran.blit(self.rond_img, (self.rect_rond_zoom, 515))
 
             font = pygame.font.SysFont("monospace", 50)
-            texte_zoom = font.render(f"Zoom: {round(self.zoom, 2)}x", True, (0, 150, 200))
+            texte_zoom = font.render(f"Fov : {round(self.zoom_para, 2)}x", True, (0, 150, 200))
             self.ecran.blit(texte_zoom, (50, 500))
 
             pygame.display.flip()
@@ -249,8 +254,16 @@ class Jeuettoutenfaite:
     def en_jeu(self):
         self.etat = "en_jeu"
         en_jeu = True
+
+        self.sprite_joueur = pygame.sprite.Sprite()
+        self.sprite_joueur.image = self.img_joueur
+        self.sprite_joueur.rect = self.img_joueur.get_rect()
+        self.sprite_joueur.rect.topleft = (self.position_x_joueur, self.position_y_joueur)
+        self.groupe_de_calques.add(self.sprite_joueur)
+
         while en_jeu:
             souris_pos = pygame.mouse.get_pos()
+            self.controledujoueur()
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -273,9 +286,25 @@ class Jeuettoutenfaite:
                     en_jeu = False
                     self.menu_principal()
                     return
+            self.sprite_joueur.rect.topleft = (self.position_x_joueur, self.position_y_joueur)
+            self.groupe_de_calques.center(self.sprite_joueur.rect.center)  # Pour centrer la map sur le joueur
 
             self.groupe_de_calques.draw(self.ecran)
             pygame.display.flip()
+
+    def controledujoueur(self):
+        touche_appuyees = pygame.key.get_pressed()
+        vitesse = 5  # vitesse du joueur en pixels
+
+        if touche_appuyees[pygame.K_z]:
+            self.position_y_joueur -= vitesse
+        if touche_appuyees[pygame.K_s]:
+            self.position_y_joueur += vitesse
+        if touche_appuyees[pygame.K_q]:
+            self.position_x_joueur -= vitesse
+        if touche_appuyees[pygame.K_d]:
+            self.position_x_joueur += vitesse
+
 
 Jeuettoutenfaite()
 
