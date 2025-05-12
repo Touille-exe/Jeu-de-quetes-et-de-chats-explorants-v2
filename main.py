@@ -24,8 +24,8 @@ class Jeuettoutenfaite:
         self.ecran = pygame.display.set_mode((self.taille_x, self.taille_y), pygame.FULLSCREEN)
         pygame.display.set_caption("Jeu de rôle : chargement")
         self.fontducharger = pygame.font.SysFont("Comfortaa", 36)
-        self.etapecharger = 1
 
+        self.etapecharger = 1
         self.ecran_charge()                                                                                                    # demarer l'écran de chargement
 
         # Limite de fps
@@ -37,13 +37,13 @@ class Jeuettoutenfaite:
         self.zoom = 1.0
 
         # Chargement de la carte et des calques
-        self.tmx_data = pytmx.util_pygame.load_pygame("assets/carte/carte2tmx.tmx")
+        self.tmx_data = pytmx.util_pygame.load_pygame("assets/carte/carte_v2.tmx")
         self.map_data = pyscroll.data.TiledMapData(self.tmx_data)
-        self.carte_renderer = pyscroll.orthographic.BufferedRenderer(self.map_data, (self.taille_x, self.taille_y), clamp_camera=True)
-        self.carte_renderer.zoom = 1.0
-        self.groupe_de_calques = pyscroll.PyscrollGroup(map_layer=self.carte_renderer, default_layer=1)
+        self.map_layer = pyscroll.orthographic.BufferedRenderer(self.map_data, (self.taille_x, self.taille_y), clamp_camera=True)
+        self.map_layer.zoom = self.zoom
+        self.groupe_de_calques = pyscroll.PyscrollGroup(map_layer=self.map_layer, default_layer=1)
 
-        self.ecran_charge()                                                                                       # actualiser l'écran de chargement
+        self.ecran_charge()                                                                                                        # actualiser l'écran de chargement
 
         # Couleurs
         self.rouge_de_lecriture = (197, 15, 31)
@@ -87,12 +87,16 @@ class Jeuettoutenfaite:
         self.menu_principal()
 
     def ecran_charge(self):
+        texte2 = self.fontducharger.render("Note : Redemarer le jeu pour que les paramètres soits pris en compte",True,(197, 15, 31))
+        texte_rect2 = texte2.get_rect(center=(self.TAILLE_X_MOITIE, (self.TAILLE_Y_MOITIE / 2) * 3))
         if self.etapecharger == 1:
             texte = self.fontducharger.render("Chargement ...", True, (197, 15, 31))
             texte_rect = texte.get_rect(center=(self.TAILLE_X_MOITIE, self.TAILLE_Y_MOITIE))
             self.ecran.fill((121, 125, 127))
             self.ecran.blit(texte, texte_rect)
-            self.etapecharger += 1
+            self.ecran.blit(texte2, texte_rect2)
+            self.etapecharger = 2
+            pygame.display.flip()
             time.sleep(0.2)
 
         if self.etapecharger == 2:
@@ -100,7 +104,9 @@ class Jeuettoutenfaite:
             texte_rect = texte.get_rect(center=(self.TAILLE_X_MOITIE, self.TAILLE_Y_MOITIE))
             self.ecran.fill((121, 125, 127))
             self.ecran.blit(texte, texte_rect)
-            self.etapecharger += 1
+            self.ecran.blit(texte2, texte_rect2)
+            self.etapecharger = 3
+            pygame.display.flip()
             time.sleep(0.2)
 
         if self.etapecharger == 3:
@@ -108,7 +114,9 @@ class Jeuettoutenfaite:
             texte_rect = texte.get_rect(center=(self.TAILLE_X_MOITIE, self.TAILLE_Y_MOITIE))
             self.ecran.fill((121, 125, 127))
             self.ecran.blit(texte, texte_rect)
+            self.ecran.blit(texte2, texte_rect2)
             self.etapecharger = 1
+            pygame.display.flip()
             time.sleep(0.2)
 
         if self.etapecharger == 4:
@@ -116,10 +124,10 @@ class Jeuettoutenfaite:
             texte_rect = texte.get_rect(center=(self.TAILLE_X_MOITIE, self.TAILLE_Y_MOITIE))
             self.ecran.fill((121, 125, 127))
             self.ecran.blit(texte, texte_rect)
+            self.ecran.blit(texte2, texte_rect2)
             self.etapecharger = 1
+            pygame.display.flip()
             time.sleep(0.5)
-
-        pygame.display.flip()
 
     def quitter(self):
         pygame.quit()
@@ -178,7 +186,7 @@ class Jeuettoutenfaite:
                     # Calcul du zoom en fonction de la position du rond
                     percent = (self.rect_rond_zoom - min_x) / (max_x - min_x)
                     self.zoom = round(0.5 + percent * (1.5 - 0.5), 2)
-                    self.carte_renderer.zoom = self.zoom
+                    self.map_layer.zoom = self.zoom
 
             # Affichage
             self.ecran.fill((255, 255, 255))
@@ -208,7 +216,13 @@ class Jeuettoutenfaite:
 
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if self.rect_boutton_parametre.collidepoint(souris_pos):
+                        menu_principal = False
                         self.parametres()
+                        return
+
+                    if self.rect_boutton_jouer.collidepoint(souris_pos):
+                        menu_principal = False
+                        self.en_jeu()
                         return
 
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_F11:
@@ -231,6 +245,37 @@ class Jeuettoutenfaite:
 
             pygame.display.flip()
             self.clock.tick(60)
+
+    def en_jeu(self):
+        self.etat = "en_jeu"
+        en_jeu = True
+        while en_jeu:
+            souris_pos = pygame.mouse.get_pos()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    menu_principal = False
+                    self.quitter()
+                    return
+
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    pass
+
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_F11:
+                    if self.en_plein_ecran:
+                        self.en_plein_ecran = False
+                        self.ecran = pygame.display.set_mode((self.taille_x, self.taille_y))
+                    elif not self.en_plein_ecran:
+                        self.en_plein_ecran = True
+                        self.ecran = pygame.display.set_mode((self.taille_x, self.taille_y), pygame.FULLSCREEN)
+
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    en_jeu = False
+                    self.menu_principal()
+                    return
+
+            self.groupe_de_calques.draw(self.ecran)
+            pygame.display.flip()
 
 Jeuettoutenfaite()
 
