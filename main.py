@@ -82,6 +82,8 @@ class Jeuettoutenfaite:
         self.position_y_joueur = self.position_du_spawn.y
         self.img_joueur = pygame.image.load("assets/joueurs/sprites/1_leo/1face2.png")
         self.img_joueur.set_colorkey([255, 255, 255])
+        self.sprite_joueur = pygame.sprite.Sprite()
+
 
 
         self.etapecharger = 4
@@ -259,7 +261,6 @@ class Jeuettoutenfaite:
         self.etat = "en_jeu"
         en_jeu = True
 
-        self.sprite_joueur = pygame.sprite.Sprite()
         self.sprite_joueur.image = self.img_joueur
         self.sprite_joueur.rect = self.img_joueur.get_rect()
         self.sprite_joueur.rect.topleft = (self.position_x_joueur, self.position_y_joueur)
@@ -290,8 +291,9 @@ class Jeuettoutenfaite:
                     en_jeu = False
                     self.menu_principal()
                     return
-            self.sprite_joueur.rect.topleft = (self.position_x_joueur, self.position_y_joueur)
+
             self.groupe_de_calques.center(self.sprite_joueur.rect.center)  # Pour centrer la map sur le joueur
+            self.sprite_joueur.rect.topleft = (self.position_x_joueur, self.position_y_joueur)
 
             self.groupe_de_calques.draw(self.ecran)
             pygame.display.flip()
