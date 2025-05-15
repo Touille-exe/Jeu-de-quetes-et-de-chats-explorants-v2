@@ -297,10 +297,11 @@ class Jeuettoutenfaite:
 
             self.groupe_de_calques.draw(self.ecran)
             pygame.display.flip()
+            self.clock.tick(60)
 
     def controledujoueur(self):
         touche_appuyees = pygame.key.get_pressed()
-        vitesse = 0.2  # vitesse du joueur en pixels
+        vitesse = 2  # vitesse du joueur en pixels
 
         if touche_appuyees[pygame.K_z]:
             self.position_y_joueur -= vitesse
