@@ -80,7 +80,7 @@ class Jeuettoutenfaite:
         # Chargement de l'image du joueur
         self.position_x_joueur = self.position_du_spawn.x
         self.position_y_joueur = self.position_du_spawn.y
-        self.img_joueur = pygame.image.load("assets/joueurs/sprites/1_leo/1face2.png")
+        self.img_joueur = pygame.image.load("assets/joueurs/sprites/player_1/1face2.png")
         self.img_joueur.set_colorkey([255, 255, 255])
         self.sprite_joueur = pygame.sprite.Sprite()
 
