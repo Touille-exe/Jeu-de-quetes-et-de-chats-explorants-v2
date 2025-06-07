@@ -21,8 +21,12 @@ class fenetre:
         self.moitie_y = self.taille_y/2
         self.tier_x = self.taille_x/3
         self.deux_tiers_x = self.tier_x*2
+        self.tier_y = self.taille_y/3
+        self.deux_tiers_y = self.tier_y*2
         self.ecran = pygame.display.set_mode((self.taille_x,self.taille_y),pygame.FULLSCREEN)
         pygame.display.set_caption("jeu de rôle")
+        self.boucle_principale = True
+        self.boucle_parametre = True
 fenetre = fenetre()
 
 class image:
@@ -58,32 +62,62 @@ class image:
 image = image()
 
 class boutons:
-    def __init__(self,fenetre):
+    def __init__(self,fenetre,image):
         class parametre:
-            def __init__(self,fenetre):
-                self.parametre = pygame.Rect((fenetre.tier_x-37,fenetre.moitie_x-37),(75,75))
-                self.jouer = pygame.Rect((fenetre.moitie_x-50,fenetre.moitie_y-50),(100,100))
-        self.parametre = parametre(fenetre)
-boutons = boutons(fenetre)
+            def __init__(self,fenetre,image):
+                self.parametre = image.parametre.parametre.get_rect(center=(fenetre.tier_x,fenetre.moitie_y))
+                self.jouer = image.parametre.jouer.get_rect(center=(fenetre.moitie_x,fenetre.moitie_y))
+                self.retour = image.parametre.retour.get_rect(topleft=(fenetre.taille_x-100,fenetre.taille_y-100))
+        self.parametre = parametre(fenetre,image)
+boutons = boutons(fenetre,image)
 
+class parametres:
+    def __init__(self):
+        self.zoom = 1
+        self.fps = 60
+        self.langue = "francais"
+parametre = parametres()
 
 #=========================================
 #fonctions
 #=========================================
-def parametre():
-    pass
+def parametre(fenetre,image,boutons,parametre):
+    fenetre.ecran.fill((0,0,0))
+    while fenetre.boucle_parametre:
+        fenetre.ecran.blit(image.parametre.barre, (fenetre.moitie_x, fenetre.tier_y))
+        fenetre.ecran.blit(image.parametre.barre,(fenetre.moitie_x,fenetre.deux_tiers_y))
+        fenetre.ecran.blit(image.parametre.retour,(fenetre.taille_x-100,fenetre.taille_y-100))
+        pygame.display.flip()
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if boutons.parametre.retour.collidepoint(event.pos):
+                    fenetre.boucle_parametre = False
+            if event.type == pygame.KEYDOWN and (event.key == pygame.K_ESCAPE or event.key == pygame.K_F11):
+                if fenetre.fullscreen == True:
+                    fenetre.fullscreen = False
+                    fenetre.ecran = pygame.display.set_mode((fenetre.taille_x, fenetre.taille_y))
+                else:
+                    fenetre.fullscreen = True
+                    fenetre.ecran = pygame.display.set_mode((fenetre.taille_x, fenetre.taille_y), pygame.FULLSCREEN)
+            if event.type == pygame.QUIT:
+                fenetre.boucle_parametre = False
+                fenetre.boucle_principale = False
+
+    fenetre.ecran.fill((0,0,0))
 
 
 #=========================================
 #boucle principale
 #=========================================
-boucle_principale = True
-while boucle_principale:
+while fenetre.boucle_principale:
     fenetre.ecran.blit(image.parametre.jouer,(fenetre.moitie_x-50,fenetre.moitie_y-50))
     fenetre.ecran.blit(image.parametre.parametre,(fenetre.tier_x-37,fenetre.moitie_y-37))
     pygame.display.flip()
 
     for event in pygame.event.get():
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if boutons.parametre.parametre.collidepoint(event.pos):
+                parametre(fenetre,image,boutons,parametre)
         if event.type == pygame.KEYDOWN and (event.key == pygame.K_ESCAPE or event.key == pygame.K_F11):
             if fenetre.fullscreen == True:
                 fenetre.fullscreen = False
@@ -92,7 +126,7 @@ while boucle_principale:
                 fenetre.fullscreen = True
                 fenetre.ecran = pygame.display.set_mode((fenetre.taille_x, fenetre.taille_y),pygame.FULLSCREEN)
         if event.type == pygame.QUIT:
-            boucle_principale = False
+            fenetre.boucle_principale = False
 
 
 #=========================================
