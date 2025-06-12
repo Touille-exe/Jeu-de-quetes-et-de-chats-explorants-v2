@@ -68,30 +68,95 @@ class boutons:
                 self.parametre = image.parametre.parametre.get_rect(center=(fenetre.tier_x,fenetre.moitie_y))
                 self.jouer = image.parametre.jouer.get_rect(center=(fenetre.moitie_x,fenetre.moitie_y))
                 self.retour = image.parametre.retour.get_rect(topleft=(fenetre.taille_x-100,fenetre.taille_y-100))
+                self.rond_fps = image.parametre.rond.get_rect(topleft=(21+fenetre.moitie_x+195,fenetre.tier_y))
+                self.barre_fps = image.parametre.barre.get_rect(topleft=(fenetre.moitie_x, fenetre.tier_y))
+                self.rond_zoom = image.parametre.rond.get_rect(topleft=(21+fenetre.moitie_x+195,fenetre.deux_tiers_y))
+                self.barre_zoom = image.parametre.barre.get_rect(topleft=(fenetre.moitie_x, fenetre.deux_tiers_y))
         self.parametre = parametre(fenetre,image)
 boutons = boutons(fenetre,image)
 
-class parametres:
+class parametre:
     def __init__(self):
         self.zoom = 1
         self.fps = 60
         self.langue = "francais"
-parametre = parametres()
+
+        self.pos_barre_fps = 195
+        self.pos_barre_zoom = 195
+parametre = parametre()
 
 #=========================================
 #fonctions
 #=========================================
-def parametre(fenetre,image,boutons,parametre):
+def parametres(fenetre,image,boutons,parametre):
     fenetre.ecran.fill((0,0,0))
+    fenetre.boucle_parametre = True
+    slide = False
+    slide2 = False
     while fenetre.boucle_parametre:
+        #affichage
+        fenetre.ecran.fill((0, 0, 0))
         fenetre.ecran.blit(image.parametre.barre, (fenetre.moitie_x, fenetre.tier_y))
+        fenetre.ecran.blit(image.parametre.rond,(21+fenetre.moitie_x+parametre.pos_barre_fps, fenetre.tier_y+15))
         fenetre.ecran.blit(image.parametre.barre,(fenetre.moitie_x,fenetre.deux_tiers_y))
+        fenetre.ecran.blit(image.parametre.rond, (21 + fenetre.moitie_x + parametre.pos_barre_zoom, fenetre.deux_tiers_y + 15))
         fenetre.ecran.blit(image.parametre.retour,(fenetre.taille_x-100,fenetre.taille_y-100))
         pygame.display.flip()
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
+                #retour
                 if boutons.parametre.retour.collidepoint(event.pos):
                     fenetre.boucle_parametre = False
+                #non_slide fps
+                elif boutons.parametre.barre_fps.collidepoint(event.pos) and not boutons.parametre.rond_fps.collidepoint(event.pos):
+                    slide = False
+                    if pygame.mouse.get_pos()[0]-fenetre.moitie_x-37<0:
+                        parametre.pos_barre_fps = 0
+                    elif pygame.mouse.get_pos()[0]-fenetre.moitie_x-37>390:
+                        parametre.pos_barre_fps = 390
+                    else:
+                        parametre.pos_barre_fps = pygame.mouse.get_pos()[0]-fenetre.moitie_x-37
+                    boutons.parametre.rond_fps = image.parametre.rond.get_rect(topleft=(21+fenetre.moitie_x+parametre.pos_barre_fps,fenetre.tier_y))
+                #active slide fps
+                elif boutons.parametre.rond_fps.collidepoint(event.pos):
+                    slide = True
+                # non_slide zoom
+                elif boutons.parametre.barre_zoom.collidepoint(event.pos) and not boutons.parametre.rond_zoom.collidepoint(event.pos):
+                    slide2 = False
+                    if pygame.mouse.get_pos()[0]-fenetre.moitie_x-37<0:
+                        parametre.pos_barre_zoom = 0
+                    elif pygame.mouse.get_pos()[0]-fenetre.moitie_x-37>390:
+                        parametre.pos_barre_zoom = 390
+                    else:
+                        parametre.pos_barre_zoom = pygame.mouse.get_pos()[0]-fenetre.moitie_x-37
+                    boutons.parametre.rond_zoom = image.parametre.rond.get_rect(topleft=(21 + fenetre.moitie_x + parametre.pos_barre_zoom, fenetre.deux_tiers_y))
+                # active slide fps
+                elif boutons.parametre.rond_zoom.collidepoint(event.pos):
+                    slide2 = True
+            #sliding fps
+            elif slide == True:
+                if pygame.mouse.get_pos()[0] - fenetre.moitie_x - 37 < 0:
+                    parametre.pos_barre_fps = 0
+                elif pygame.mouse.get_pos()[0] - fenetre.moitie_x - 37 > 390:
+                    parametre.pos_barre_fps = 390
+                else:
+                    parametre.pos_barre_fps = pygame.mouse.get_pos()[0] - fenetre.moitie_x - 37
+                if event.type == pygame.MOUSEBUTTONUP:
+                    slide = False
+                    boutons.parametre.rond_fps = image.parametre.rond.get_rect(topleft=(21 + fenetre.moitie_x + parametre.pos_barre_fps, fenetre.tier_y))
+            # sliding zoom
+            elif slide2 == True:
+                if pygame.mouse.get_pos()[0] - fenetre.moitie_x - 37 < 0:
+                    parametre.pos_barre_zoom = 0
+                elif pygame.mouse.get_pos()[0] - fenetre.moitie_x - 37 > 390:
+                    parametre.pos_barre_zoom = 390
+                else:
+                    parametre.pos_barre_zoom = pygame.mouse.get_pos()[0] - fenetre.moitie_x - 37
+                if event.type == pygame.MOUSEBUTTONUP:
+                    slide2 = False
+                    boutons.parametre.rond_zoom = image.parametre.rond.get_rect(topleft=(21 + fenetre.moitie_x + parametre.pos_barre_zoom, fenetre.deux_tiers_y))
+
+            #gestion de la fenetre
             if event.type == pygame.KEYDOWN and (event.key == pygame.K_ESCAPE or event.key == pygame.K_F11):
                 if fenetre.fullscreen == True:
                     fenetre.fullscreen = False
@@ -117,7 +182,7 @@ while fenetre.boucle_principale:
     for event in pygame.event.get():
         if event.type == pygame.MOUSEBUTTONDOWN:
             if boutons.parametre.parametre.collidepoint(event.pos):
-                parametre(fenetre,image,boutons,parametre)
+                parametres(fenetre,image,boutons,parametre)
         if event.type == pygame.KEYDOWN and (event.key == pygame.K_ESCAPE or event.key == pygame.K_F11):
             if fenetre.fullscreen == True:
                 fenetre.fullscreen = False
