@@ -94,8 +94,17 @@ def parametres(fenetre,image,boutons,parametre):
     slide = False
     slide2 = False
     while fenetre.boucle_parametre:
+        parametre.zoom = round(0.5+(parametre.pos_barre_zoom/390),2)
+        parametre.fps = int(30+(parametre.pos_barre_fps/390*60))
         #affichage
         fenetre.ecran.fill((0, 0, 0))
+
+        font = pygame.font.SysFont("monospace", 50)
+        texte = font.render(f"zoom:{parametre.zoom}",True,(0,150,200))
+        fenetre.ecran.blit(texte,(50,fenetre.deux_tiers_y+25))
+        texte = font.render(f"fps:{parametre.fps}",True,(0,150,200))
+        fenetre.ecran.blit(texte,(50,fenetre.tier_y+25))
+
         fenetre.ecran.blit(image.parametre.barre, (fenetre.moitie_x, fenetre.tier_y))
         fenetre.ecran.blit(image.parametre.rond,(21+fenetre.moitie_x+parametre.pos_barre_fps, fenetre.tier_y+15))
         fenetre.ecran.blit(image.parametre.barre,(fenetre.moitie_x,fenetre.deux_tiers_y))
