@@ -92,8 +92,8 @@ class parametre:
         self.fps = 60
         self.langue = "francais"
 
-        self.pos_barre_fps = 195
-        self.pos_barre_zoom = 195
+        self.pos_barre_fps = 195*fenetre.ratio
+        self.pos_barre_zoom = 195*fenetre.ratio
         self.max_barre = 390*fenetre.ratio
 parametre = parametre(fenetre)
 
