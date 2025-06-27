@@ -68,6 +68,8 @@ class image:
                 self.dos1 = pygame.image.load("assets/joueurs/sprites/player_1/dos1.png")
                 self.dos2 = pygame.image.load("assets/joueurs/sprites/player_1/dos2.png")
                 self.dos3 = pygame.image.load("assets/joueurs/sprites/player_1/dos3.png")
+        class carte:
+            def __init__(self):
         self.perso1 = perso1()
         self.parametre = parametre(fenetre)
 image = image(fenetre)
@@ -170,6 +172,12 @@ def parametres(fenetre,image,boutons,parametre):
 
     fenetre.ecran.fill((0,0,0))
 
+#=========================================
+#carte
+#=========================================
+def carte(fenetre,image,boutons,parametre):
+    fenetre.ecran.fill((0,0,0))
+
 
 #=========================================
 #boucle principale
@@ -183,6 +191,8 @@ while fenetre.boucle_principale:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if boutons.parametre.parametre.collidepoint(event.pos):
                 parametres(fenetre,image,boutons,parametre)
+            elif boutons.parametre.jouer.collidepoint(event.pos):
+                carte(fenetre,image,boutons,parametre)
         if event.type == pygame.KEYDOWN and (event.key == pygame.K_ESCAPE or event.key == pygame.K_F11):
             if fenetre.fullscreen == True:
                 fenetre.fullscreen = False
