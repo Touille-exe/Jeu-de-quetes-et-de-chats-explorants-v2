@@ -205,7 +205,7 @@ while fenetre.boucle_principale:
 
 
 #=========================================
-#fermeture du jeux
+#fermeture du jeu
 #=========================================
-#il faudra ajouter la sauvegard des données
+#il faudra ajouter la sauvegarde des données
 pygame.quit()
