@@ -70,9 +70,9 @@ class image:
                 self.dos3 = pygame.image.load("assets/joueurs/sprites/player_1/dos3.png")
         class carte:
             def __init__(self):
-        self.perso1 = perso1()
-        self.parametre = parametre(fenetre)
-image = image(fenetre)
+                self.perso1 = perso1()
+                self.parametre = parametre(fenetre)
+                image = image(fenetre)
 
 class boutons:
     def __init__(self,fenetre,image):
