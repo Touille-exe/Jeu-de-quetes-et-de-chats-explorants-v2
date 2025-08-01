@@ -1,3 +1,5 @@
+# c'est un test wsh
+
 import pygame
 import pytmx
 import pyscroll
@@ -72,7 +74,8 @@ class image:
             def __init__(self):
                 self.perso1 = perso1()
                 self.parametre = parametre(fenetre)
-                image = image(fenetre)
+            image = image(fenetre)
+
 
 class boutons:
     def __init__(self,fenetre,image):
