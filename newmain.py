@@ -13,7 +13,7 @@ pygame.init()
 #=========================================
 class fenetre:
     def __init__(self):
-        taille_x , taille_y = 1000,500#pyautogui.size()
+        taille_x , taille_y = pyautogui.size()
         if taille_x > taille_y*(16/9):
             taille_x = int(taille_y*(16/9))
         else:
@@ -72,10 +72,17 @@ class image:
                 self.dos3 = pygame.image.load("assets/joueurs/sprites/player_1/dos3.png")
         class carte:
             def __init__(self):
-                self.perso1 = perso1()
-                self.parametre = parametre(fenetre)
+                self.tmx_data = pytmx.util_pygame.load_pygame("assets/carte/carte_v2.tmx")
+                self.map_data = pyscroll.data.TiledMapData(self.tmx_data)
+                self.position_du_spawn = self.tmx_data.get_object_by_name("spawn")  # Récupération de l'objet spawn
+                self.map_layer = pyscroll.orthographic.BufferedRenderer(self.map_data, (self.taille_x, self.taille_y),clamp_camera=True)
+                self.map_layer.zoom = self.zoom_para + 2
+                self.groupe_de_calques = pyscroll.PyscrollGroup(map_layer=self.map_layer, default_layer=5)
 
+        self.perso1 = perso1()
         self.parametre = parametre(fenetre)
+
+
 image = image(fenetre)
 
 
