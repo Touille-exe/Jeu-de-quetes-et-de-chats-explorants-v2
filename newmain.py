@@ -74,7 +74,9 @@ class image:
             def __init__(self):
                 self.perso1 = perso1()
                 self.parametre = parametre(fenetre)
-            image = image(fenetre)
+
+        self.parametre = parametre(fenetre)
+image = image(fenetre)
 
 
 class boutons:
