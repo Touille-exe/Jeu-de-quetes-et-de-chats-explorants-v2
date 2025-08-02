@@ -273,11 +273,8 @@
 </data>
  </layer>
  <objectgroup id="3" name="collisions">
-  <object id="11" x="801.697" y="799.212">
+  <object id="11" name="spawn" x="801.697" y="799.212">
    <point/>
-  </object>
-  <object id="12" x="778" y="799.833" width="48" height="19">
-   <text wrap="1">spawn</text>
   </object>
  </objectgroup>
 </map>
