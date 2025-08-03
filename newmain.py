@@ -4,7 +4,7 @@ import pygame
 import pytmx
 import pyscroll
 import pyautogui
-import time
+#import time
 #import json
 pygame.init()
 
@@ -56,6 +56,7 @@ class image:
                 self.barre = pygame.transform.scale(barre,(500*fenetre.ratio,100*fenetre.ratio))
                 rond = pygame.image.load("assets/boutton du menu principal/para/rond.png")
                 self.rond = pygame.transform.scale(rond,(70*fenetre.ratio,70*fenetre.ratio))
+        self.parametre = parametre(fenetre)
         class perso1:
             def __init__(self):
                 self.face1 = pygame.image.load("assets/joueurs/sprites/player_1/face1.png")
@@ -70,18 +71,13 @@ class image:
                 self.dos1 = pygame.image.load("assets/joueurs/sprites/player_1/dos1.png")
                 self.dos2 = pygame.image.load("assets/joueurs/sprites/player_1/dos2.png")
                 self.dos3 = pygame.image.load("assets/joueurs/sprites/player_1/dos3.png")
+        self.perso1 = perso1()
         class carte:
             def __init__(self):
                 self.tmx_data = pytmx.util_pygame.load_pygame("assets/carte/carte_v2.tmx")
                 self.map_data = pyscroll.data.TiledMapData(self.tmx_data)
                 self.position_du_spawn = self.tmx_data.get_object_by_name("spawn")  # Récupération de l'objet spawn
-                self.map_layer = pyscroll.orthographic.BufferedRenderer(self.map_data, (self.taille_x, self.taille_y),clamp_camera=True)
-                self.map_layer.zoom = self.zoom_para + 2
-                self.groupe_de_calques = pyscroll.PyscrollGroup(map_layer=self.map_layer, default_layer=5)
-
-        self.perso1 = perso1()
-        self.parametre = parametre(fenetre)
-
+                self.map_layer = pyscroll.orthographic.BufferedRenderer(self.map_data, (fenetre.taille_x, fenetre.taille_y),clamp_camera=True)
 
 image = image(fenetre)
 
@@ -189,6 +185,8 @@ def parametres(fenetre,image,boutons,parametre):
 #=========================================
 def carte(fenetre,image,boutons,parametre):
     fenetre.ecran.fill((0,0,0))
+    image.carte.map_layer.zoom = parametre.zoom + 2
+    image.carte.groupe_de_calques = pyscroll.PyscrollGroup(map_layer=image.carte.map_layer, default_layer=5)
 
 
 #=========================================
