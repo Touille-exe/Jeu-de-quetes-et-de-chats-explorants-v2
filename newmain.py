@@ -80,7 +80,7 @@ class Image:
 
         class Carte:
             def __init__(self):
-                self.tmx_data = pytmx.util_pygame.load_pygame("assets/nouvelle carte/carte.tmx")
+                self.tmx_data = pytmx.util_pygame.load_pygame("assets/carte/carte.tmx")
                 self.map_data = pyscroll.data.TiledMapData(self.tmx_data)
                 self.position_du_spawn = self.tmx_data.get_object_by_name("spawn")
                 self.map_layer = pyscroll.orthographic.BufferedRenderer(
