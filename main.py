@@ -2,318 +2,351 @@ import pygame
 import pytmx
 import pyscroll
 import pyautogui
-import time
-##     import json
 
+pygame.init()
 
-class Jeuettoutenfaite:
+#=========================================
+# Fenêtre
+#=========================================
+class Fenetre:
     def __init__(self):
-        pygame.init()
+        taille_x, taille_y = pyautogui.size()
+        if taille_x > taille_y * (16 / 9):
+            taille_x = int(taille_y * (16 / 9))
+        else:
+            taille_y = int(taille_x * (9 / 16))
 
-        # Taille de la fenêtre
-        self.taille_x, self.taille_y = pyautogui.size()
-        self.taille_x -= 20
-        self.taille_y -= 100
-        self.TAILLE_X_MOITIE = self.taille_x / 2
-        self.TAILLE_Y_MOITIE = self.taille_y / 2
-
-        # Variable pour savoir si on est en plein écran
-        self.en_plein_ecran = True
-
-        # Création de la fenêtre (initialement en plein écran) puis de l'écran de chargement
-        self.ecran = pygame.display.set_mode((self.taille_x, self.taille_y), pygame.FULLSCREEN)
-        pygame.display.set_caption("Jeu de rôle : chargement")
-        self.fontducharger = pygame.font.SysFont("Comfortaa", 36)
-
-        self.etapecharger = 1
-        self.ecran_charge()                                                                                                    # demarer l'écran de chargement
-
-        # Limite de fps
+        self.fullscreen = False
         self.clock = pygame.time.Clock()
+        self.acces = ["principale"]
 
-        # Variables de jeu
-        self.position_x_joueur = 0
-        self.position_y_joueur = 0
-        self.zoom_para = 1.0
+        self.taille_x = taille_x - 20
+        self.taille_y = taille_y - 100
+        self.moitie_x = self.taille_x / 2
+        self.moitie_y = self.taille_y / 2
+        self.tier_x = self.taille_x / 3
+        self.deux_tiers_x = self.tier_x * 2
+        self.tier_y = self.taille_y / 3
+        self.deux_tiers_y = self.tier_y * 2
 
-        # Chargement de la carte et des calques
-        self.tmx_data = pytmx.util_pygame.load_pygame("assets/carte/carte_v2.tmx")
-        self.map_data = pyscroll.data.TiledMapData(self.tmx_data)
-        self.position_du_spawn = self.tmx_data.get_object_by_name("spawn")  # Récupération de l'objet spawn
-        self.map_layer = pyscroll.orthographic.BufferedRenderer(self.map_data, (self.taille_x, self.taille_y), clamp_camera=True)
-        self.map_layer.zoom = self.zoom_para + 2
-        self.groupe_de_calques = pyscroll.PyscrollGroup(map_layer=self.map_layer, default_layer=5)
+        self.ecran = pygame.display.set_mode((self.taille_x, self.taille_y))
+        pygame.display.set_caption("jeu de rôle")
 
-        self.ecran_charge()                                                                                                        # actualiser l'écran de chargement
+        self.boucle_principale = True
+        self.boucle_parametre = True
 
-        # Couleurs
-        self.rouge_de_lecriture = (197, 15, 31)
-        self.vert_de_lecriture = (21, 171, 12)
-        self.gris_du_fond = (121, 125, 127)
-        self.blanc = (255, 255, 255)
-        self.noir = (0, 0, 0)
-        self.rouge = (255, 0, 0)
-
-        # Chargement et redimensionnement des boutons du menu principal
-        self.boutton_jouer_img = pygame.image.load("assets/boutton du menu principal/boutton play.png")
-        self.boutton_jouer_img = pygame.transform.scale(self.boutton_jouer_img, (100, 100))
-        self.rect_boutton_jouer = self.boutton_jouer_img.get_rect(center=(self.TAILLE_X_MOITIE, self.TAILLE_Y_MOITIE))
-
-        self.boutton_parametre_img = pygame.image.load("assets/boutton du menu principal/paramètres.png")
-        self.boutton_parametre_img = pygame.transform.scale(self.boutton_parametre_img, (75, 75))
-        self.rect_boutton_parametre = self.boutton_parametre_img.get_rect(center=(self.taille_x / 4, self.TAILLE_Y_MOITIE))
-
-        self.boutton_retour_img = pygame.image.load("assets/boutton du menu principal/retour.png")
-        self.boutton_retour_img = pygame.transform.scale(self.boutton_retour_img, (75, 75))
-        self.rect_boutton_retour = self.boutton_retour_img.get_rect(bottomright=(self.taille_x - 50, self.taille_y - 50))
+        self.ratio = self.taille_x / 1280
+        self.demi_ratio = self.ratio / 2
 
 
-        self.ecran_charge()                                                                                                    # actualiser l'écran de chargement
+fenetre = Fenetre()
 
-        # Chargement des éléments des paramètres
-        self.barre_img = pygame.image.load("assets/boutton du menu principal/para/barre.png")
-        self.barre_img = pygame.transform.scale(self.barre_img, (500, 100))
-        self.rond_img = pygame.image.load("assets/boutton du menu principal/para/rond.png")
-        self.rond_img = pygame.transform.scale(self.rond_img, (70, 70))
-        self.rect_rond_zoom = 920 + (self.zoom_para * 400)
+#=========================================
+# Images
+#=========================================
+class Image:
+    def __init__(self, fenetre):
+        class Parametre:
+            def __init__(self, fenetre):
+                jouer = pygame.image.load("assets/boutton du menu principal/boutton play.png")
+                self.jouer = pygame.transform.scale(jouer, (200 * fenetre.ratio, 200 * fenetre.ratio))
+                parametre = pygame.image.load("assets/boutton du menu principal/paramètres.png")
+                self.parametre = pygame.transform.scale(parametre, (175 * fenetre.ratio, 175 * fenetre.ratio))
+                retour = pygame.image.load("assets/boutton du menu principal/retour.png")
+                self.retour = pygame.transform.scale(retour, (75 * fenetre.ratio, 75 * fenetre.ratio))
+                barre = pygame.image.load("assets/boutton du menu principal/para/barre.png")
+                self.barre = pygame.transform.scale(barre, (500 * fenetre.ratio, 100 * fenetre.ratio))
+                rond = pygame.image.load("assets/boutton du menu principal/para/rond.png")
+                self.rond = pygame.transform.scale(rond, (70 * fenetre.ratio, 70 * fenetre.ratio))
 
-        # Chargement de l'image du joueur
-        self.position_x_joueur = self.position_du_spawn.x
-        self.position_y_joueur = self.position_du_spawn.y
-        self.img_joueur = pygame.image.load("assets/joueurs/sprites/player_1/face1.png")
-        self.img_joueur.set_colorkey([255, 255, 255])
-        self.sprite_joueur = pygame.sprite.Sprite()
+        self.parametre = Parametre(fenetre)
+
+        class Perso1:
+            def __init__(self):
+                self.face1 = pygame.image.load("assets/joueurs/sprites/player_1/face1.png")
+                self.face2 = pygame.image.load("assets/joueurs/sprites/player_1/face2.png")
+                self.face3 = pygame.image.load("assets/joueurs/sprites/player_1/face3.png")
+                self.gauche1 = pygame.image.load("assets/joueurs/sprites/player_1/gauche1.png")
+                self.gauche2 = pygame.image.load("assets/joueurs/sprites/player_1/gauche2.png")
+                self.gauche3 = pygame.image.load("assets/joueurs/sprites/player_1/gauche3.png")
+                self.droite1 = pygame.image.load("assets/joueurs/sprites/player_1/droite1.png")
+                self.droite2 = pygame.image.load("assets/joueurs/sprites/player_1/droite2.png")
+                self.droite3 = pygame.image.load("assets/joueurs/sprites/player_1/droite3.png")
+                self.dos1 = pygame.image.load("assets/joueurs/sprites/player_1/dos1.png")
+                self.dos2 = pygame.image.load("assets/joueurs/sprites/player_1/dos2.png")
+                self.dos3 = pygame.image.load("assets/joueurs/sprites/player_1/dos3.png")
+
+        self.perso1 = Perso1()
+
+        class Carte:
+            def __init__(self):
+                self.tmx_data = pytmx.util_pygame.load_pygame("assets/carte/carte.tmx")
+                self.map_data = pyscroll.data.TiledMapData(self.tmx_data)
+                self.position_du_spawn = self.tmx_data.get_object_by_name("spawn")
+                self.map_layer = pyscroll.orthographic.BufferedRenderer(
+                    self.map_data, (fenetre.taille_x, fenetre.taille_y), clamp_camera=True
+                )
+
+                # Calque des collisions
+                self.walls = []
+                for obj in self.tmx_data.objects:
+                    if obj.type == "collisions":
+                        rect = pygame.Rect(obj.x, obj.y, obj.width, obj.height)
+                        self.walls.append(rect)
+
+        self.carte = Carte()
 
 
+image = Image(fenetre)
 
-        self.etapecharger = 4
-        self.ecran_charge()                                                                                                    # finir l'écran de chargement
+#=========================================
+# Boutons
+#=========================================
+class Boutons:
+    def __init__(self, fenetre, image):
+        class Parametre:
+            def __init__(self, fenetre, image):
+                self.parametre = image.parametre.parametre.get_rect(
+                    center=(fenetre.tier_x - (fenetre.ratio * 100), fenetre.moitie_y)
+                )
+                self.jouer = image.parametre.jouer.get_rect(center=(fenetre.moitie_x, fenetre.moitie_y))
+                self.retour = image.parametre.retour.get_rect(
+                    topleft=(fenetre.taille_x - (100 * fenetre.ratio), fenetre.taille_y - (100 * fenetre.ratio))
+                )
+                self.rond_fps = image.parametre.rond.get_rect(
+                    topleft=((21 * fenetre.ratio) + fenetre.moitie_x + (195 * fenetre.ratio), fenetre.tier_y)
+                )
+                self.barre_fps = image.parametre.barre.get_rect(topleft=(fenetre.moitie_x, fenetre.tier_y))
+                self.rond_zoom = image.parametre.rond.get_rect(
+                    topleft=((21 * fenetre.ratio) + fenetre.moitie_x + (195 * fenetre.ratio), fenetre.deux_tiers_y)
+                )
+                self.barre_zoom = image.parametre.barre.get_rect(topleft=(fenetre.moitie_x, fenetre.deux_tiers_y))
 
-        # États du jeu
-        self.etat = "euu"
-        self.menu_principal()
+        self.parametre = Parametre(fenetre, image)
 
-    def ecran_charge(self):
-        texte2 = self.fontducharger.render("Note : Redemarer le jeu pour que les paramètres soits pris en compte",True,(197, 15, 31))
-        texte_rect2 = texte2.get_rect(center=(self.TAILLE_X_MOITIE, (self.TAILLE_Y_MOITIE / 2) * 3))
-        if self.etapecharger == 1:
-            texte = self.fontducharger.render("Chargement ...", True, (197, 15, 31))
-            texte_rect = texte.get_rect(center=(self.TAILLE_X_MOITIE, self.TAILLE_Y_MOITIE))
-            self.ecran.fill((121, 125, 127))
-            self.ecran.blit(texte, texte_rect)
-            self.ecran.blit(texte2, texte_rect2)
-            self.etapecharger = 2
-            pygame.display.flip()
-            time.sleep(0.2)
 
-        if self.etapecharger == 2:
-            texte = self.fontducharger.render("Chargement .", True, (197, 15, 31))
-            texte_rect = texte.get_rect(center=(self.TAILLE_X_MOITIE, self.TAILLE_Y_MOITIE))
-            self.ecran.fill((121, 125, 127))
-            self.ecran.blit(texte, texte_rect)
-            self.ecran.blit(texte2, texte_rect2)
-            self.etapecharger = 3
-            pygame.display.flip()
-            time.sleep(0.2)
+boutons = Boutons(fenetre, image)
 
-        if self.etapecharger == 3:
-            texte = self.fontducharger.render("Chargement ..", True, (197, 15, 31))
-            texte_rect = texte.get_rect(center=(self.TAILLE_X_MOITIE, self.TAILLE_Y_MOITIE))
-            self.ecran.fill((121, 125, 127))
-            self.ecran.blit(texte, texte_rect)
-            self.ecran.blit(texte2, texte_rect2)
-            self.etapecharger = 1
-            pygame.display.flip()
-            time.sleep(0.2)
+#=========================================
+# Paramètres
+#=========================================
+class Parametre:
+    def __init__(self, fenetre):
+        self.zoom = 1
+        self.fps = 60
+        self.langue = "francais"
 
-        if self.etapecharger == 4:
-            texte = self.fontducharger.render("C'est fait !", True, (197, 15, 31))
-            texte_rect = texte.get_rect(center=(self.TAILLE_X_MOITIE, self.TAILLE_Y_MOITIE))
-            self.ecran.fill((121, 125, 127))
-            self.ecran.blit(texte, texte_rect)
-            self.ecran.blit(texte2, texte_rect2)
-            self.etapecharger = 1
-            pygame.display.flip()
-            time.sleep(0.5)
+        self.pos_barre_fps = 195 * fenetre.ratio
+        self.pos_barre_zoom = 195 * fenetre.ratio
+        self.max_barre = 390 * fenetre.ratio
 
-    def quitter(self):
-        pygame.quit()
 
-    def parametres(self):
-        en_parametres = True
-        zoom_drag = False  # Pour savoir si on déplace le bouton de zoom_para
+parametre = Parametre(fenetre)
 
-        # Limites du slider
-        pos_barre_x = 700
-        largeur_barre = 500
-        min_x = pos_barre_x + 20
-        max_x = pos_barre_x + largeur_barre - 90  # Le rond fait ~70px
+#=========================================
+# Fonctions déplacements, animations
+#=========================================
+def parametres(fenetre,image,boutons,parametre):
+    fenetre.boucle_parametre = True
+    slide = False
+    slide2 = False
+    while fenetre.boucle_parametre:
+        parametre.zoom = round(0.5+(parametre.pos_barre_zoom/parametre.max_barre),2)
+        parametre.fps = int(30+(parametre.pos_barre_fps/parametre.max_barre*60))
+        #affichage
+        fenetre.ecran.fill((0,0,0))
 
-        # Valeurs de zoom_para modifiables
-        zoom_min = 1.0
-        zoom_max = 1.5
+        font = pygame.font.SysFont("monospace", int(50*fenetre.ratio))
+        texte = font.render(f"zoom:{parametre.zoom}",True,(0,150,200))
+        fenetre.ecran.blit(texte,(50*fenetre.ratio,fenetre.deux_tiers_y+(25*fenetre.ratio)))
+        texte = font.render(f"fps:{parametre.fps}",True,(0,150,200))
+        fenetre.ecran.blit(texte,(50*fenetre.ratio,fenetre.tier_y+(25*fenetre.ratio)))
 
-        # Position initiale du rond basée sur le zoom_para
-        self.rect_rond_zoom = min_x + ((self.zoom_para - zoom_min) / (zoom_max - zoom_min)) * (max_x - min_x)
-
-        while en_parametres:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    en_parametres = False
-                    self.quitter()
-                    return
-
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        en_parametres = False
-                        self.menu_principal()
-                        return
-
-                    if event.key == pygame.K_F11:
-                        self.en_plein_ecran = not self.en_plein_ecran
-                        if self.en_plein_ecran:
-                            self.ecran = pygame.display.set_mode((self.taille_x, self.taille_y), pygame.FULLSCREEN)
-                        else:
-                            self.ecran = pygame.display.set_mode((self.taille_x, self.taille_y - 90))
-
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if self.rect_boutton_retour.collidepoint(event.pos):
-                        en_parametres = False
-                        self.menu_principal()
-                        return
-
-                    # Détection du clic sur le rond
-                    position_boutton_rond_zoom = self.rond_img.get_rect(topleft=(self.rect_rond_zoom, 515))
-                    if position_boutton_rond_zoom.collidepoint(event.pos):
-                        zoom_drag = True
-
+        fenetre.ecran.blit(image.parametre.barre, (fenetre.moitie_x, fenetre.tier_y))
+        fenetre.ecran.blit(image.parametre.rond,((21*fenetre.ratio)+fenetre.moitie_x+parametre.pos_barre_fps, fenetre.tier_y+(15*fenetre.ratio)))
+        fenetre.ecran.blit(image.parametre.barre,(fenetre.moitie_x,fenetre.deux_tiers_y))
+        fenetre.ecran.blit(image.parametre.rond, ((21*fenetre.ratio) + fenetre.moitie_x + parametre.pos_barre_zoom, fenetre.deux_tiers_y + (15*fenetre.ratio)))
+        fenetre.ecran.blit(image.parametre.retour,(fenetre.taille_x-(100*fenetre.ratio),fenetre.taille_y-(100*fenetre.ratio)))
+        pygame.display.flip()
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                #retour
+                if boutons.parametre.retour.collidepoint(event.pos):
+                    fenetre.boucle_parametre = False
+                #non_slide fps
+                elif boutons.parametre.barre_fps.collidepoint(event.pos):
+                    slide = True
+                # non_slide zoom
+                elif boutons.parametre.barre_zoom.collidepoint(event.pos):
+                    slide2 = True
+            #sliding fps
+            elif slide == True:
+                if pygame.mouse.get_pos()[0] - fenetre.moitie_x - 37 < 0:
+                    parametre.pos_barre_fps = 0
+                elif pygame.mouse.get_pos()[0] - fenetre.moitie_x - 37 > parametre.max_barre:
+                    parametre.pos_barre_fps = parametre.max_barre
+                else:
+                    parametre.pos_barre_fps = pygame.mouse.get_pos()[0] - fenetre.moitie_x - 37
                 if event.type == pygame.MOUSEBUTTONUP:
-                    zoom_drag = False
+                    slide = False
+                    boutons.parametre.rond_fps = image.parametre.rond.get_rect(topleft=(21 + fenetre.moitie_x + parametre.pos_barre_fps, fenetre.tier_y))
+            # sliding zoom
+            elif slide2 == True:
+                if pygame.mouse.get_pos()[0] - fenetre.moitie_x - 37 < 0:
+                    parametre.pos_barre_zoom = 0
+                elif pygame.mouse.get_pos()[0] - fenetre.moitie_x - 37 > parametre.max_barre:
+                    parametre.pos_barre_zoom = parametre.max_barre
+                else:
+                    parametre.pos_barre_zoom = pygame.mouse.get_pos()[0] - fenetre.moitie_x - 37
+                if event.type == pygame.MOUSEBUTTONUP:
+                    slide2 = False
+                    boutons.parametre.rond_zoom = image.parametre.rond.get_rect(topleft=(21 + fenetre.moitie_x + parametre.pos_barre_zoom, fenetre.deux_tiers_y))
 
-                if event.type == pygame.MOUSEMOTION and zoom_drag:
-                    mouse_x = pygame.mouse.get_pos()[0]
-                    self.rect_rond_zoom = max(min_x, min(mouse_x, max_x))
+            #gestion de la fenetre
+            if event.type == pygame.KEYDOWN and (event.key == pygame.K_ESCAPE or event.key == pygame.K_F11):
+                if fenetre.fullscreen == True:
+                    fenetre.fullscreen = False
+                    fenetre.ecran = pygame.display.set_mode((fenetre.taille_x, fenetre.taille_y))
+                else:
+                    fenetre.fullscreen = True
+                    fenetre.ecran = pygame.display.set_mode((fenetre.taille_x, fenetre.taille_y), pygame.FULLSCREEN)
+            if event.type == pygame.QUIT:
+                fenetre.boucle_parametre = False
+                fenetre.boucle_principale = False
 
-                    # Calcul du zoom_para en fonction de la position du rond
-                    percent = (self.rect_rond_zoom - min_x) / (max_x - min_x)
-                    self.zoom_para = round(zoom_min + percent * (zoom_max - zoom_min), 2)
-                    self.map_layer.zoom = self.zoom_para + 2
-
-            # Affichage
-            self.ecran.fill((255, 255, 255))
-            self.ecran.blit(self.boutton_retour_img, self.rect_boutton_retour)
-            self.ecran.blit(self.barre_img, (pos_barre_x, 500))
-            self.ecran.blit(self.rond_img, (self.rect_rond_zoom, 515))
-
-            font = pygame.font.SysFont("monospace", 50)
-            texte_zoom = font.render(f"Fov : {round(self.zoom_para, 2)}x", True, (0, 150, 200))
-            self.ecran.blit(texte_zoom, (50, 500))
-
-            pygame.display.flip()
-            self.clock.tick(60)
-
-    def menu_principal(self):
-        self.etat = "menu_principal"
-        pygame.display.set_caption("Jeu de rôle : Main menu")
-        menu_principal = True
-        while menu_principal:
-            souris_pos = pygame.mouse.get_pos()
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    menu_principal = False
-                    self.quitter()
-                    return
-
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    if self.rect_boutton_parametre.collidepoint(souris_pos):
-                        menu_principal = False
-                        self.parametres()
-                        return
-
-                    if self.rect_boutton_jouer.collidepoint(souris_pos):
-                        menu_principal = False
-                        self.en_jeu()
-                        return
-
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_F11:
-                    if self.en_plein_ecran:
-                        self.en_plein_ecran = False
-                        self.ecran = pygame.display.set_mode((self.taille_x, self.taille_y))
-                    elif not self.en_plein_ecran:
-                        self.en_plein_ecran = True
-                        self.ecran = pygame.display.set_mode((self.taille_x, self.taille_y), pygame.FULLSCREEN)
-
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                    menu_principal = False
-                    self.quitter()
-                    return
+    fenetre.ecran.fill((0,0,0))
 
 
-            self.ecran.fill((0, 0, 0))
-            self.ecran.blit(self.boutton_jouer_img, self.rect_boutton_jouer)
-            self.ecran.blit(self.boutton_parametre_img, self.rect_boutton_parametre)
 
-            pygame.display.flip()
-            self.clock.tick(60)
+def deplacement(player, touches, walls, vitesse=5):
+    dx, dy = 0, 0
+    direction = None
 
-    def en_jeu(self):
-        self.etat = "en_jeu"
-        en_jeu = True
+    if touches[pygame.K_UP]:
+        dy = -vitesse
+        direction = "haut"
+    elif touches[pygame.K_DOWN]:
+        dy = vitesse
+        direction = "bas"
+    if touches[pygame.K_LEFT]:
+        dx = -vitesse
+        direction = "gauche"
+    elif touches[pygame.K_RIGHT]:
+        dx = vitesse
+        direction = "droite"
 
-        self.sprite_joueur.image = self.img_joueur
-        self.sprite_joueur.rect = self.img_joueur.get_rect()
-        self.sprite_joueur.rect.topleft = (self.position_x_joueur, self.position_y_joueur)
-        self.groupe_de_calques.add(self.sprite_joueur)
+    # --- Déplacement axe X ---
+    if dx != 0:
+        player.rect.x += dx
+        for wall in walls:
+            if player.rect.colliderect(wall):
+                if dx > 0:  # vers la droite
+                    player.rect.right = wall.left
+                if dx < 0:  # vers la gauche
+                    player.rect.left = wall.right
 
-        while en_jeu:
-            souris_pos = pygame.mouse.get_pos()
-            self.controledujoueur()
+    # --- Déplacement axe Y ---
+    if dy != 0:
+        player.rect.y += dy
+        for wall in walls:
+            if player.rect.colliderect(wall):
+                if dy > 0:  # vers le bas
+                    player.rect.bottom = wall.top
+                if dy < 0:  # vers le haut
+                    player.rect.top = wall.bottom
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    menu_principal = False
-                    self.quitter()
-                    return
-
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    pass
-
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_F11:
-                    if self.en_plein_ecran:
-                        self.en_plein_ecran = False
-                        self.ecran = pygame.display.set_mode((self.taille_x, self.taille_y))
-                    elif not self.en_plein_ecran:
-                        self.en_plein_ecran = True
-                        self.ecran = pygame.display.set_mode((self.taille_x, self.taille_y), pygame.FULLSCREEN)
-
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                    en_jeu = False
-                    self.menu_principal()
-                    return
-
-            self.groupe_de_calques.center(self.sprite_joueur.rect.center)  # Pour centrer la map sur le joueur
-            self.sprite_joueur.rect.topleft = (self.position_x_joueur, self.position_y_joueur)
-
-            self.groupe_de_calques.draw(self.ecran)
-            pygame.display.flip()
-            self.clock.tick(60)
-
-    def controledujoueur(self):
-        touche_appuyees = pygame.key.get_pressed()
-        vitesse = 2  # vitesse du joueur en pixels
-
-        if touche_appuyees[pygame.K_z]:
-            self.position_y_joueur -= vitesse
-        if touche_appuyees[pygame.K_s]:
-            self.position_y_joueur += vitesse
-        if touche_appuyees[pygame.K_q]:
-            self.position_x_joueur -= vitesse
-        if touche_appuyees[pygame.K_d]:
-            self.position_x_joueur += vitesse
+    return direction
 
 
-Jeuettoutenfaite()
+def animation(player, direction, compteur, image):
+    frame = (compteur // 10) % 3 + 1
+    if direction == "bas":
+        player.image = getattr(image.perso1, f"face{frame}")
+    elif direction == "haut":
+        player.image = getattr(image.perso1, f"dos{frame}")
+    elif direction == "gauche":
+        player.image = getattr(image.perso1, f"gauche{frame}")
+    elif direction == "droite":
+        player.image = getattr(image.perso1, f"droite{frame}")
 
 
-# test
+#=========================================
+# Boucle du jeu
+#=========================================
+def jeu(fenetre, image, parametre, groupe, player, walls):
+    boucle_jeu = True
+    compteur = 0
+    direction = "bas"
+
+    while boucle_jeu:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                boucle_jeu = False
+                fenetre.boucle_principale = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    boucle_jeu = False  # retour menu
+
+        touches = pygame.key.get_pressed()
+        new_direction = deplacement(player, touches, walls)
+
+        if new_direction:
+            direction = new_direction
+            compteur += 1
+            animation(player, direction, compteur, image)
+        else:
+            compteur = 0
+
+        groupe.center(player.rect.center)
+
+        # affichage
+        groupe.draw(fenetre.ecran)
+        pygame.display.flip()
+        fenetre.clock.tick(parametre.fps)
+
+
+#=========================================
+# Initialisation de la carte
+#=========================================
+def carte(fenetre, image, boutons, parametre):
+    image.carte.map_layer.zoom = parametre.zoom + 2
+    groupe = pyscroll.PyscrollGroup(map_layer=image.carte.map_layer, default_layer=5)
+
+    spawn = image.carte.position_du_spawn
+    player = pygame.sprite.Sprite()
+    player.image = image.perso1.face1
+    player.rect = player.image.get_rect()
+    player.rect.center = (spawn.x, spawn.y)
+
+    groupe.add(player)
+    jeu(fenetre, image, parametre, groupe, player, image.carte.walls)
+
+
+#=========================================
+# Boucle principale (menu)
+#=========================================
+while fenetre.boucle_principale:
+    fenetre.ecran.fill((0,0,0))
+    fenetre.ecran.blit(image.parametre.jouer, (fenetre.moitie_x - (100 * fenetre.ratio), fenetre.moitie_y - (100 * fenetre.ratio)))
+    fenetre.ecran.blit(image.parametre.parametre, (fenetre.tier_x - (175 * fenetre.ratio) - (fenetre.ratio * 100), fenetre.moitie_y - (87 * fenetre.ratio)))
+    pygame.display.flip()
+
+    for event in pygame.event.get():
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if boutons.parametre.parametre.collidepoint(event.pos):
+                parametres(fenetre,image,boutons,parametre)
+            elif boutons.parametre.jouer.collidepoint(event.pos):
+                carte(fenetre, image, boutons, parametre)
+
+        if event.type == pygame.KEYDOWN and (event.key == pygame.K_ESCAPE or event.key == pygame.K_F11):
+            if fenetre.fullscreen:
+                fenetre.fullscreen = False
+                fenetre.ecran = pygame.display.set_mode((fenetre.taille_x, fenetre.taille_y))
+            else:
+                fenetre.fullscreen = True
+                fenetre.ecran = pygame.display.set_mode((fenetre.taille_x, fenetre.taille_y), pygame.FULLSCREEN)
+
+        if event.type == pygame.QUIT:
+            fenetre.boucle_principale = False
+
+pygame.quit()

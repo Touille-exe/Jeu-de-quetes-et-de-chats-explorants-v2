@@ -80,7 +80,7 @@ class Image:
 
         class Carte:
             def __init__(self):
-                self.tmx_data = pytmx.util_pygame.load_pygame("assets/nouvelle carte/carte.tmx")
+                self.tmx_data = pytmx.util_pygame.load_pygame("assets/carte/carte.tmx")
                 self.map_data = pyscroll.data.TiledMapData(self.tmx_data)
                 self.position_du_spawn = self.tmx_data.get_object_by_name("spawn")
                 self.map_layer = pyscroll.orthographic.BufferedRenderer(
@@ -228,24 +228,32 @@ def deplacement(player, touches, walls, vitesse=5):
     elif touches[pygame.K_DOWN]:
         dy = vitesse
         direction = "bas"
-    elif touches[pygame.K_LEFT]:
+    if touches[pygame.K_LEFT]:
         dx = -vitesse
         direction = "gauche"
     elif touches[pygame.K_RIGHT]:
         dx = vitesse
         direction = "droite"
 
-    # Déplacement axe X
+    # --- Déplacement axe X ---
     if dx != 0:
-        new_rect = player.rect.move(dx, 0)
-        if not any(new_rect.colliderect(w) for w in walls):
-            player.rect = new_rect
+        player.rect.x += dx
+        for wall in walls:
+            if player.rect.colliderect(wall):
+                if dx > 0:  # vers la droite
+                    player.rect.right = wall.left
+                if dx < 0:  # vers la gauche
+                    player.rect.left = wall.right
 
-    # Déplacement axe Y
+    # --- Déplacement axe Y ---
     if dy != 0:
-        new_rect = player.rect.move(0, dy)
-        if not any(new_rect.colliderect(w) for w in walls):
-            player.rect = new_rect
+        player.rect.y += dy
+        for wall in walls:
+            if player.rect.colliderect(wall):
+                if dy > 0:  # vers le bas
+                    player.rect.bottom = wall.top
+                if dy < 0:  # vers le haut
+                    player.rect.top = wall.bottom
 
     return direction
 
