@@ -274,7 +274,6 @@ def jeu(fenetre, image, parametre, groupe, player, walls):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 boucle_jeu = False
-                fenetre.boucle_principale = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     boucle_jeu = False  # retour menu
