@@ -180,7 +180,7 @@ def parametres(fenetre,image,boutons,parametre):
                 elif boutons.parametre.barre_zoom.collidepoint(event.pos):
                     slide2 = True
             #sliding fps
-            elif slide == True:
+            elif slide:
                 if pygame.mouse.get_pos()[0] - fenetre.moitie_x - 37 < 0:
                     parametre.pos_barre_fps = 0
                 elif pygame.mouse.get_pos()[0] - fenetre.moitie_x - 37 > parametre.max_barre:
@@ -191,7 +191,7 @@ def parametres(fenetre,image,boutons,parametre):
                     slide = False
                     boutons.parametre.rond_fps = image.parametre.rond.get_rect(topleft=(21 + fenetre.moitie_x + parametre.pos_barre_fps, fenetre.tier_y))
             # sliding zoom
-            elif slide2 == True:
+            elif slide2:
                 if pygame.mouse.get_pos()[0] - fenetre.moitie_x - 37 < 0:
                     parametre.pos_barre_zoom = 0
                 elif pygame.mouse.get_pos()[0] - fenetre.moitie_x - 37 > parametre.max_barre:
@@ -204,7 +204,7 @@ def parametres(fenetre,image,boutons,parametre):
 
             #gestion de la fenetre
             if event.type == pygame.KEYDOWN and (event.key == pygame.K_ESCAPE or event.key == pygame.K_F11):
-                if fenetre.fullscreen == True:
+                if fenetre.fullscreen:
                     fenetre.fullscreen = False
                     fenetre.ecran = pygame.display.set_mode((fenetre.taille_x, fenetre.taille_y))
                 else:
